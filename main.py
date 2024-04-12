@@ -46,7 +46,6 @@ def main():
         if command == "stop":
             terminate()
             break
-    print(loaded_model.summary()
 
 if __name__ == "__main__":
     main()
