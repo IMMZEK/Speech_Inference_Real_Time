@@ -21,30 +21,32 @@ def get_spectrogram(waveform):
     return spectrogram
 
 
-commands = ["down", "go", "left", "no", "right", "stop", "up", "yes"]
-loaded_model = tf.saved_model.load("saved_old", tags=None, options=None)
+commands = ['down', 'go', 'left', 'no', 'right', 'stop', 'up', 'yes']
+loaded_model = tf.saved_model.load("saved", tags=None, options=None)
 
 
 def predict_mic():
     audio = record_audio()
-    spec = preprocess_audiobuffer(audio)
-    prediction = loaded_model(spec)
-    label_pred = np.argmax(prediction, axis=1)
-    logits = prediction['predictions']
-    probabilities = tf.nn.softmax(logits).numpy()
-    print(probabilities)
-    command = commands[commands[0]]
-    print("Predicted label:", command)
-    return command
+    # spec = preprocess_audiobuffer(audio)
+    # prediction = loaded_model(spec)
+    # label_pred = np.argmax(prediction, axis=1)
+    # logits = prediction['predictions']
+    # probabilities = tf.nn.softmax(logits).numpy()
+    # print(probabilities)
+    # command = commands[commands[0]]
+    # print("Predicted label:", command)
+    prediction = loaded_model.predict_realtime(audio)
+    return prediction
 
 
 def main():
     from turtle_helper import move_turtle
     while True:
         command = predict_mic()
-        move_turtle(command)
+        print(command)
+        # move_turtle(command)
         if command == "stop":
-            terminate()
+        #     terminate()
             break
 
 if __name__ == "__main__":
