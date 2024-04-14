@@ -1,7 +1,8 @@
 import pyaudio
 import numpy as np
 
-FRAMES_PER_BUFFER = 3200
+# FRAMES_PER_BUFFER = 3200
+FRAMES_PER_BUFFER = 6400
 FORMAT = pyaudio.paInt16
 CHANNELS = 1
 RATE = 16000
@@ -29,7 +30,8 @@ def record_audio():
     stream.stop_stream()
     stream.close()
     
-    return np.frombuffer(b''.join(frames), dtype=np.int16)
+    # return np.frombuffer(b''.join(frames), dtype=np.int16)
+    return np.frombuffer(b''.join(frames), dtype=np.float32)
 
 
 def terminate():

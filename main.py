@@ -1,53 +1,31 @@
+import sounddevice as sd
 import numpy as np
-
 import tensorflow as tf
+from scipy.signal import spectrogram
 
-from recording_helper import record_audio, terminate
-from tf_helper import preprocess_audiobuffer
+# Parameters
+sampling_rate = 16000  # Sampling rate of the microphone input
+duration = 1  # Duration in seconds of each audio snippet
+num_samples = sampling_rate * duration
 
+# Load the TensorFlow model
+model = tf.saved_model.load('saved')
 
-def get_spectrogram(waveform):
-    # Convert the waveform to a spectrogram via a STFT.
-    spectrogram = tf.signal.stft(waveform, frame_length=255, frame_step=128)
+def audio_callback(indata, frames, time, status):
+    # Convert the audio input to a numpy array
+    audio_data = np.squeeze(indata)
+    # Generate a spectrogram
+    _, _, Sxx = spectrogram(audio_data, fs=sampling_rate, nperseg=256, noverlap=128)
+    Sxx = np.log(Sxx + 1e-10)  # Convert power to dB
+    Sxx = tf.convert_to_tensor(Sxx, dtype=tf.float32)
+    Sxx = tf.expand_dims(Sxx, 0)
+    Sxx = tf.expand_dims(Sxx, -1)  # Add channel dimension
+    
+    # Perform inference
+    prediction = model(Sxx, training=False)
+    print("Predicted Class:", prediction)
 
-    # Obtain the magnitude of the STFT.
-    spectrogram = tf.abs(spectrogram)
-
-    # Add a `channels` dimension, so that the spectrogram can be used
-    # as image-like input data with convolution layers (which expect
-    # shape (`batch_size`, `height`, `width`, `channels`).
-    spectrogram = spectrogram[..., tf.newaxis]
-
-    return spectrogram
-
-
-commands = ['down', 'go', 'left', 'no', 'right', 'stop', 'up', 'yes']
-loaded_model = tf.saved_model.load("saved", tags=None, options=None)
-
-
-def predict_mic():
-    audio = record_audio()
-    # spec = preprocess_audiobuffer(audio)
-    # prediction = loaded_model(spec)
-    # label_pred = np.argmax(prediction, axis=1)
-    # logits = prediction['predictions']
-    # probabilities = tf.nn.softmax(logits).numpy()
-    # print(probabilities)
-    # command = commands[commands[0]]
-    # print("Predicted label:", command)
-    prediction = loaded_model.predict_realtime(audio)
-    return prediction
-
-
-def main():
-    from turtle_helper import move_turtle
-    while True:
-        command = predict_mic()
-        print(command)
-        # move_turtle(command)
-        if command == "stop":
-        #     terminate()
-            break
-
-if __name__ == "__main__":
-    main()
+# Set up the stream to capture audio
+with sd.InputStream(callback=audio_callback, channels=1, samplerate=sampling_rate, blocksize=num_samples):
+    print("Starting real-time audio inference. Speak into your microphone...")
+    sd.sleep(duration * 1000)  # Keep the stream open
