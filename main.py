@@ -1,31 +1,41 @@
-import sounddevice as sd
-import numpy as np
-import tensorflow as tf
-from scipy.signal import spectrogram
+import speech_recognition as sr
 
-# Parameters
-sampling_rate = 16000  # Sampling rate of the microphone input
-duration = 1  # Duration in seconds of each audio snippet
-num_samples = sampling_rate * duration
+recognizer = sr.Recognizer()
 
-# Load the TensorFlow model
-model = tf.saved_model.load('saved')
+def capture_voice_input():
+    with sr.Microphone() as source:
+        print("Listening...")
+        audio = recognizer.listen(source)
+    return audio
 
-def audio_callback(indata, frames, time, status):
-    # Convert the audio input to a numpy array
-    audio_data = np.squeeze(indata)
-    # Generate a spectrogram
-    _, _, Sxx = spectrogram(audio_data, fs=sampling_rate, nperseg=256, noverlap=128)
-    Sxx = np.log(Sxx + 1e-10)  # Convert power to dB
-    Sxx = tf.convert_to_tensor(Sxx, dtype=tf.float32)
-    Sxx = tf.expand_dims(Sxx, 0)
-    Sxx = tf.expand_dims(Sxx, -1)  # Add channel dimension
-    
-    # Perform inference
-    prediction = model(Sxx, training=False)
-    print("Predicted Class:", prediction)
+def convert_voice_to_text(audio):
+    try:
+        text = recognizer.recognize_google(audio)
+        print("You said: " + text)
+    except sr.UnknownValueError:
+        text = ""
+        print("Sorry, I didn't understand that.")
+    except sr.RequestError as e:
+        text = ""
+        print("Error; {0}".format(e))
+    return text
 
-# Set up the stream to capture audio
-with sd.InputStream(callback=audio_callback, channels=1, samplerate=sampling_rate, blocksize=num_samples):
-    print("Starting real-time audio inference. Speak into your microphone...")
-    sd.sleep(duration * 1000)  # Keep the stream open
+def process_voice_command(text):
+    if "hello" in text.lower():
+        print("Hello! How can I help you?")
+    elif "goodbye" in text.lower():
+        print("Goodbye! Have a great day!")
+        return True
+    else:
+        print("I didn't understand that command. Please try again.")
+    return False
+
+def main():
+    end_program = False
+    while not end_program:
+        audio = capture_voice_input()
+        text = convert_voice_to_text(audio)
+        end_program = process_voice_command(text)
+
+if __name__ == "__main__":
+    main()
