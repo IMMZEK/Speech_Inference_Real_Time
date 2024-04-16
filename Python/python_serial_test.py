@@ -20,7 +20,7 @@ stream = audio.open(format=FORMAT, channels=CHANNELS, rate=RATE, input=True, fra
 audio_buffer = []
 
 # UART settings
-uart = serial.Serial("/dev/ttyS0", baudrate=9600, timeout=1)
+uart = serial.Serial("COM5", baudrate=9600, timeout=1)
 
 # Command mapping
 commands = {

@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Serial Monitor</title>
+<script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    var socket = io.connect(location.protocol + '//' + document.domain + ':' + location.port + '/test');
+    socket.on('newdata', function(msg) {
+        document.getElementById('data').textContent += msg.data + '\n';
+    });
+  });
+</script>
+</head>
+<body>
+<h1>Arduino Serial Data:</h1>
+<pre id="data"></pre>
+</body>
+</html>
