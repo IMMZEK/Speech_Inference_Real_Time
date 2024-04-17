@@ -32,7 +32,7 @@ def findCommand(keyword, threshold=75):
 
     if score >= threshold:
         return command_dict[best_match]
-    return '100\n' # Return None if no command closely matches
+    return '-1\n' # Return None if no command closely matches
     
 # Initialize Audio Processor and UART
 audio_processor = AudioProcessor()
