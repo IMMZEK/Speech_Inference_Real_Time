@@ -5,12 +5,12 @@ import time
 
 # Dictionary for voice commands
 command_dict = {
-    "light on": '0 \n',
-    "light off": '1 \n',
-    "fan on": '2\n',
-    "fan off": '3\n',
-    "temperature up": '4\n',
-    "temperature down": '5\n'
+    "light on": '0',
+    "light off": '1',
+    "fan on": '2',
+    "fan off": '3',
+    "temperature up": '4',
+    "temperature down": '5'
 }
 
 
