@@ -5,8 +5,8 @@ import time
 
 # Dictionary for voice commands
 command_dict = {
-    "light on": '0\n',
-    "light off": '1\n',
+    "light on": '0 \n',
+    "light off": '1 \n',
     "fan on": '2\n',
     "fan off": '3\n',
     "temperature up": '4\n',
@@ -32,7 +32,7 @@ def findCommand(keyword, threshold=75):
 
     if score >= threshold:
         return command_dict[best_match]
-    return None # Return None if no command closely matches
+    return '100\n' # Return None if no command closely matches
     
 # Initialize Audio Processor and UART
 audio_processor = AudioProcessor()
@@ -57,8 +57,9 @@ def main():
                 # Verified what the MCU recieved
                 received_data = uart.receive_data()
                 if received_data:
-                    print("Received from MCU:", received_data)
-                
+                    print(f"Received from MCU: {received_data}")
+                    print("------------------------------------")
+        # time.sleep(2)        
     except KeyboardInterrupt:
         print("Exiting...")
     finally:
